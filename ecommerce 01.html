@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>E-Kart </title>
+  <style>
+    :root{--accent:#2563eb;--green:#16a34a}
+    *{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+    body{margin:0;background:#f7f7f9;color:#111}
+    .container{max-width:1000px;margin:0 auto;padding:18px}
+    header{background:#fff;border-bottom:1px solid #eee}
+    header .container{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    nav a{margin-left:12px;text-decoration:none;color:#333}
+    nav a.cta{background:var(--accent);color:#fff;padding:6px 10px;border-radius:6px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    .card{background:#fff;padding:12px;border-radius:8px;border:1px solid #e8e8ee}
+    .btn{background:var(--accent);color:#fff;padding:8px 12px;border:none;border-radius:6px;text-decoration:none;cursor:pointer}
+    .btn.small{padding:6px 8px;font-size:14px}
+    .btn.green{background:var(--green)}
+    .mt{margin-top:10px}
+    .error{color:#b91c1c;margin-top:10px}
+    .hidden{display:none}
+    input,textarea,select{padding:8px;border:1px solid #ddd;border-radius:6px}
+    .logo-img{height:40px}
+    .nav-right{display:flex;align-items:center;gap:8px}
+    .badge{background:#ef4444;color:#fff;padding:2px 6px;border-radius:12px;font-size:12px;vertical-align:top;margin-left:6px}
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <header>
+    <div class="container">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Shopify_logo_2018.png" class="logo-img" alt="E-Kart Logo">
+      <nav style="flex:1">
+        <a href="#home" onclick="show('home')">Home</a>
+        <a href="#products" onclick="show('products')">Products</a>
+        <a href="#cart" onclick="show('cart')">Cart <span id="cartCount" class="badge hidden">0</span></a>
+        <a href="#contact" onclick="show('contact')">Contact Us</a>
+        <a href="#about" onclick="show('about')">About Us</a>
+      </nav>
+      <div class="nav-right">
+        <a href="#login" onclick="show('login')" class="cta" id="navLogin">Login</a>
+        <a href="#account" onclick="show('account')" class="cta hidden" id="navAccount">Account</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- HOME -->
+    <section id="home">
+      <h2>
+      <div class="grid" id="homeFeatured"></div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section id="products" class="hidden">
+      <h2>Products</h2>
+      <input id="searchBar" oninput="render()" placeholder="Search products..." style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;margin-bottom:12px;">
+      <div id="prodList" class="grid"></div>
+    </section>
+
+    <!-- CART -->
+    <section id="cart" class="hidden">
+      <h2>My Cart</h2>
+      <div id="cartArea"></div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="hidden">
+      <h2>About Us</h2>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="hidden">
+      <h2>Contact Us</h2>
+      <p>Email: support@example.com</p>
+    </section>
+
+    <!-- LOGIN -->
+    <section id="login" class="hidden">
+      <h2>Login</h2>
+      <div class="card" style="max-width:420px">
+        <input id="loginEmail" placeholder="Email"><br><br>
+        <input id="loginPass" type="password" placeholder="Password"><br>
+        <div class="mt"><button class="btn" onclick="doLogin()">Login</button></div>
+        <div id="loginErr" class="error"></div>
+        <p class="mt">Don't have an account? <a href="#register" onclick="show('register')">Register</a></p>
+      </div>
+    </section>
+
+    <!-- REGISTER -->
+    <section id="register" class="hidden">
+      <h2>Register</h2>
+      <div class="card" style="max-width:420px">
+        <input id="regName" placeholder="Full Name"><br><br>
+        <input id="regEmail" placeholder="Email"><br><br>
+        <input id="regPass" type="password" placeholder="Password (min 6 chars)"><br>
+        <div class="mt"><button class="btn" onclick="doRegister()">Register</button></div>
+        <div id="regErr" class="error"></div>
+      </div>
+    </section>
+
+    <!-- ACCOUNT -->
+    <section id="account" class="hidden">
+      <h2>My Account</h2>
+      <button class="btn" onclick="logout()">Logout</button>
+      <div id="accArea" class="mt"></div>
+    </section>
+
+  </div>
+
+  <script>
+    // ------------------ DATA ------------------
+    const PRODUCTS = [
+      {id:1,name:'Wireless Headphones',price:1999,rating:4.5,img:'https://images.unsplash.com/photo-1580894748990-9b8c41f1b9e1?w=600'},
+      {id:2,name:'Smartphone',price:14999,rating:4.2,img:'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600'},
+      {id:3,name:'Laptop',price:45999,rating:4.7,img:'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600'},
+      {id:4,name:'Smartwatch',price:4999,rating:4.3,img:'https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?w=600'},
+      {id:5,name:'Bluetooth Speaker',price:1299,rating:4.4,img:'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=600'},
+      {id:6,name:'Gaming Keyboard',price:2499,rating:4.6,img:'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600'},
+      {id:7,name:'Wireless Mouse',price:899,rating:4.1,img:'https://images.unsplash.com/photo-1586953208448-8e1605ecb231?w=600'},
+      {id:8,name:'DSLR Camera',price:55999,rating:4.8,img:'https://images.unsplash.com/photo-1519183071298-a2962eadc365?w=600'},
+      {id:9,name:'Earbuds',price:1599,rating:4.3,img:'https://images.unsplash.com/photo-1590650046871-92c88748a3c8?w=600'},
+      {id:10,name:'Power Bank',price:999,rating:4.2,img:'https://images.unsplash.com/photo-1509395176047-4a66953fd231?w=600'}
+    ];
+
+    const KEY_USERS = 'ec_users';
+    const KEY_CUR = 'ec_cur';
+    const KEY_CART = 'ec_cart';
+
+    function loadUsers(){ return JSON.parse(localStorage.getItem(KEY_USERS)||'[]'); }
+    function saveUsers(u){ localStorage.setItem(KEY_USERS,JSON.stringify(u)); }
+    function getCur(){ return localStorage.getItem(KEY_CUR); }
+    function setCur(e){ if(e) localStorage.setItem(KEY_CUR,e); else localStorage.removeItem(KEY_CUR); }
+
+    function loadCart(){ return JSON.parse(localStorage.getItem(KEY_CART)||'[]'); }
+    function saveCart(c){ localStorage.setItem(KEY_CART,JSON.stringify(c)); }
+
+    // ------------------ NAVIGATION ------------------
+    function show(id){
+      document.querySelectorAll('section').forEach(sec=>sec.classList.add('hidden'));
+      const el = document.getElementById(id);
+      if(el) el.classList.remove('hidden');
+      render();
+    }
+
+    // ------------------ REGISTER ------------------
+    function doRegister(){
+      const name=document.getElementById('regName').value.trim();
+      const email=document.getElementById('regEmail').value.trim().toLowerCase();
+      const pass=document.getElementById('regPass').value;
+      const err=document.getElementById('regErr'); err.textContent='';
+
+      if(!name||!email||!pass){ err.textContent='All fields required'; return; }
+      if(pass.length<6){ err.textContent='Password too short'; return; }
+
+      const users=loadUsers();
+      if(users.find(u=>u.email===email)){ err.textContent='Email already exists'; return; }
+
+      users.push({name,email,password:pass,orders:[],wishlist:[],reviews:[],messages:[],reports:[]});
+      saveUsers(users); setCur(email); show('account');
+    }
+
+    // ------------------ LOGIN ------------------
+    function doLogin(){
+      const email=document.getElementById('loginEmail').value.trim().toLowerCase();
+      const pass=document.getElementById('loginPass').value;
+      const err=document.getElementById('loginErr'); err.textContent='';
+
+      const users=loadUsers();
+      const u=users.find(x=>x.email===email&&x.password===pass);
+      if(!u){ err.textContent='Invalid login'; return; }
+
+      setCur(email); show('account');
+    }
+
+    // ------------------ ACCOUNT RENDER ------------------
+    function getUser(){ const e=getCur(); if(!e) return null; return loadUsers().find(u=>u.email===e); }
+    function updateUser(u){ const users=loadUsers(); const i=users.findIndex(x=>x.email===u.email); if(i>=0) users[i]=u; else users.push(u); saveUsers(users); }
+
+    function renderAccount(){
+      const area=document.getElementById('accArea');
+      const u=getUser(); if(!u){ area.innerHTML='<div class="card">Not logged in</div>'; return; }
+
+      let html=`<h3>Orders</h3>`;
+      html+=u.orders.length?'<ul>'+u.orders.map(o=>`<li>${o.product.name} - ₹${o.product.price}</li>`).join('')+'</ul>':'<div>No orders</div>';
+
+      html+=`<h3 class="mt">Wishlist</h3>`;
+      html+=u.wishlist.length?'<ul>'+u.wishlist.map(w=>`<li>${w.name} - ₹${w.price} <button class="btn small" onclick="buyFromWishlist(${w.id})">Buy</button> <button class="btn small" onclick="removeFromWishlist(${w.id})">Remove</button></li>`).join('')+'</ul>':'<div>Empty</div>';
+
+      html+=`<h3 class="mt">Reviews</h3>`;
+      html+=u.reviews.length?'<ul>'+u.reviews.map(r=>`<li>${r.text||'(no text)'} (Rating ${r.rating})</li>`).join('')+'</ul>':'<div>No reviews</div>';
+
+      html+=`<h3 class="mt">Customer Care</h3>`;
+      html+=u.messages.length?'<ul>'+u.messages.map(m=>`<li>${m.subject}: ${m.message}</li>`).join('')+'</ul>':'<div>No messages</div>';
+
+      html+=`<h3 class="mt">Reports</h3>`;
+      html+=u.reports.length?'<ul>'+u.reports.map(r=>`<li>${r.type}: ${r.desc}</li>`).join('')+'</ul>':'<div>No reports</div>';
+
+      area.innerHTML=html;
+    }
+
+    // ------------------ PRODUCTS ACTIONS ------------------
+    function addToWishlist(id){ const u=getUser(); if(!u){ alert('Login first'); show('login'); return; }
+      const p=PRODUCTS.find(x=>x.id===id);
+      if(u.wishlist.find(w=>w.id===id)) return alert('Already added');
+      u.wishlist.push(p); updateUser(u); alert('Added to wishlist'); render(); }
+
+    function removeFromWishlist(id){ const u=getUser(); if(!u) return; u.wishlist = u.wishlist.filter(w=>w.id!==id); updateUser(u); renderAccount(); render(); }
+
+    function buyFromWishlist(id){ buyNow(id); removeFromWishlist(id); }
+
+    function buyNow(id){ const u=getUser(); if(!u){ alert('Login first'); show('login'); return; }
+      const p=PRODUCTS.find(x=>x.id===id);
+      const order = {id:Date.now(), product:p, date:new Date().toISOString(), status:'Processing'};
+      u.orders.unshift(order); updateUser(u); alert('Order placed'); renderAccount(); render(); }
+
+    function review(id){ const u=getUser(); if(!u){ alert('Login first'); show('login'); return; }
+      const rating=prompt('Rating 1-5'); if(!rating) return;
+      const text=prompt('Review text') || '';
+      u.reviews.unshift({productId:id,rating:rating,text:text}); updateUser(u); alert('Review added'); renderAccount(); render(); }
+
+    // ------------------ CART ------------------
+    function addToCart(id){ let c=loadCart(); const p=PRODUCTS.find(x=>x.id===id); c.push(p); saveCart(c); updateCartBadge(); alert('Added to cart'); renderCart(); }
+    function removeFromCart(index){ let c=loadCart(); c.splice(index,1); saveCart(c); updateCartBadge(); renderCart(); }
+    function clearCart(){ saveCart([]); updateCartBadge(); renderCart(); }
+    function checkout(){ const u=getUser(); if(!u){ alert('Login first'); show('login'); return; }
+      const c=loadCart(); if(c.length===0){ alert('Cart empty'); return; }
+      c.forEach(p=> u.orders.unshift({id:Date.now()+Math.random(), product:p, date:new Date().toISOString(), status:'Processing'}));
+      updateUser(u); clearCart(); alert('Checkout complete — orders placed'); renderAccount(); show('account'); }
+
+    function renderCart(){
+      const area=document.getElementById('cartArea');
+      const c=loadCart();
+      if(!c.length){ area.innerHTML='<div class="card">Cart is empty</div>'; updateCartBadge(); return; }
+      let total = c.reduce((s,p)=>s+p.price,0);
+      let html = '<div class="card"><ul>'+c.map((p,i)=>`<li style="margin-bottom:8px"><img src="${p.img}" style="width:80px;height:60px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:8px"> ${p.name} - ₹${p.price} <button class="btn small" onclick="removeFromCart(${i})">Remove</button></li>`).join('')+'</ul>';
+      html += `<div class="mt"><strong>Total: ₹${total}</strong></div>`;
+      html += `<div class="mt"><button class="btn green" onclick="checkout()">Checkout</button> <button class="btn" onclick="clearCart()">Clear Cart</button></div></div>`;
+      area.innerHTML = html;
+      updateCartBadge();
+    }
+
+    function updateCartBadge(){ const c=loadCart(); const el=document.getElementById('cartCount'); if(c.length>0){ el.textContent = c.length; el.classList.remove('hidden'); } else { el.classList.add('hidden'); } }
+
+    // ------------------ LOGOUT ------------------
+    function logout(){ setCur(null); show('home'); }
+
+    // ------------------ RENDER ALL ------------------
+    function render(){
+      const isLogged=!!getCur();
+      document.getElementById('navLogin').classList.toggle('hidden',isLogged);
+      document.getElementById('navAccount').classList.toggle('hidden',!isLogged);
+
+      // Home featured (first 3)
+      document.getElementById('homeFeatured').innerHTML =
+        PRODUCTS.slice(0,3).map(p=>`<div class='card'><img src="${p.img}" style="width:100%;border-radius:6px;" /><h4>${p.name}</h4><div>₹${p.price}</div><div>⭐${p.rating}</div></div>`).join('');
+
+      // Product list (apply search)
+      const q = (document.getElementById('searchBar') && document.getElementById('searchBar').value.toLowerCase()) || '';
+      const filtered = PRODUCTS.filter(p => p.name.toLowerCase().includes(q));
+      document.getElementById('prodList').innerHTML =
+        filtered.map(p=>`
+          <div class='card'>
+            <img src="${p.img}" style="width:100%;border-radius:6px;" />
+            <h4>${p.name}</h4>
+            <p>₹${p.price}</p>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class='btn small green' onclick='buyNow(${p.id})'>Buy</button>
+              <button class='btn small' onclick='addToCart(${p.id})'>Add to Cart</button>
+              <button class='btn small' onclick='addToWishlist(${p.id})'>Wishlist</button>
+              <button class='btn small' onclick='review(${p.id})'>Review</button>
+            </div>
+          </div>`).join('');
+
+      // Account area if visible
+      renderAccount();
+      // Cart area if visible
+      renderCart();
+    }
+
+    // initial setup
+    updateCartBadge();
+    show('home');
+  </script>
+</body>
+</html>
